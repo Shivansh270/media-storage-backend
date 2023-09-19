@@ -9,5 +9,6 @@ const {
 } = require("../controllers/fileUplod");
 
 router.post("/localFileUpload", localFileUpload);
+router.post("/imageUpload", imageUpload);
 
 module.exports = router;
