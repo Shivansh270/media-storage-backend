@@ -34,9 +34,14 @@ const isFileTypeSupported = (type, supportedTypes) => {
 };
 
 //cloudinary upload function
-const uploadFileToCloudinary = async (file, folder) => {
+const uploadFileToCloudinary = async (file, folder, quality) => {
   const options = { folder };
-  return await cloudinary.uploader.upload(file.tempFilePath);
+  options.resource_type = "auto";
+
+  if (quality) {
+    options.quality = quality;
+  }
+  return await cloudinary.uploader.upload(file.tempFilePath, options);
 };
 
 exports.imageUpload = async (req, res) => {
@@ -55,8 +60,88 @@ exports.imageUpload = async (req, res) => {
         message: "file formaat not supported",
       });
     }
+    const response = await uploadFileToCloudinary(file, "shivansh");
+    console.log(response);
 
-    //file format supported then upload to cloudinary
+    const fileData = await File.create({
+      name,
+      tags,
+      email,
+      imageUrl: response.secure_url,
+    });
+
+    res.json({
+      success: true,
+      message: "image uploaded to cloudinary",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: "image did not upload",
+    });
+  }
+};
+
+//video upload
+
+exports.videoUpload = async (req, res) => {
+  try {
+    const { name, tags, email } = req.body;
+    const file = req.files.videoFile;
+    console.log(file);
+
+    const supportedTypes = ["mp4", "mov"];
+    const fileType = file.name.split(".")[1].toLowerCase();
+
+    //validation on file format
+    if (!isFileTypeSupported(fileType, supportedTypes)) {
+      return res.status(400).json({
+        success: false,
+        message: "file formaat not supported",
+      });
+    }
+    const response = await uploadFileToCloudinary(file, "shivansh");
+    console.log(response);
+
+    const fileData = await File.create({
+      name,
+      tags,
+      email,
+      videoUrl: response.secure_url,
+    });
+
+    res.json({
+      success: true,
+      message: "video uploaded to cloudinary",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: "video did not upload",
+    });
+  }
+};
+
+//reduce size image upload
+
+exports.imageReducerUpload = async (req, res) => {
+  try {
+    const { name, tags, email } = req.body;
+    const file = req.files.imageFile;
+    console.log(file);
+
+    const supportedTypes = ["jpg", "pgeg", "png"];
+    const fileType = file.name.split(".")[1].toLowerCase();
+
+    //validation on file format
+    if (!isFileTypeSupported(fileType, supportedTypes)) {
+      return res.status(400).json({
+        success: false,
+        message: "file formaat not supported",
+      });
+    }
     const response = await uploadFileToCloudinary(file, "shivansh");
     console.log(response);
 
